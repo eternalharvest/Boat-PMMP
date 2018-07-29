@@ -13,7 +13,7 @@ use pocketmine\event\entity\{
 };
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\{
-	EntityEventPacket, SetEntityLinkPacket
+	EntityEventPacket, MoveEntityAbsolutePacket, SetEntityLinkPacket
 };
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 
@@ -197,7 +197,15 @@ class Boat extends Entity{
 	public function absoluteMove(Vector3 $pos, float $yaw = 0, float $pitch = 0) : void{
 		$this->setComponents($pos->x, $pos->y, $pos->z);
 		$this->setRotation($yaw, $pitch);
-		$this->updateMovement();
+		//$this->updateMovement();
+		$pk = new MoveEntityAbsolutePacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->flags = MoveEntityAbsolutePacket::FLAG_GROUND;
+		$pk->position = $pos;
+		$pk->xRot = $yaw;
+		$pk->yRot = $pk->zRot = $pitch;
+
+		Server::getInstance()->broadcastPacket($this->getViewers(), $pk);
 	}
 
 	/**
