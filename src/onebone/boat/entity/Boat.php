@@ -32,8 +32,8 @@ class Boat extends Entity{
 	/** @var float */
 	public $drag = 0.1;
 
-	/** @var Entity */
-	public $rider;
+	/** @var Entity[] */
+	public $riders = [];
 
 	public function initEntity() : void{
 		parent::initEntity();
@@ -121,12 +121,10 @@ class Boat extends Entity{
 	}
 
 	/**
-	 * @param Entity $rider
-	 *
 	 * @return bool
 	 */
-	public function canLink(Entity $rider) : bool{
-		return $this->rider === null;
+	public function canLink() : bool{
+		return count($this->riders) < 2;
 	}
 
 	/**
@@ -135,23 +133,31 @@ class Boat extends Entity{
 	 * @return bool
 	 */
 	public function link(Entity $rider) : bool{
-		if($this->rider === null){
+		if($this->canLink()){
 			$rider->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_RIDING, true);
 
-			//Set the rider seat position to y + 1
-			$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(0, 1, 0));
+			if(empty($this->riders[0])){ //is first rider (controller)
+				//Set the rider seat position to (0.2, 0.8)
+				$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(0.2, 0.8));
 
-			//Lock the rider rotation -90 to 90
-			$rider->getDataPropertyManager()->setByte(self::DATA_RIDER_ROTATION_LOCKED, true);
-			$rider->getDataPropertyManager()->setFloat(self::DATA_RIDER_MAX_ROTATION, 90);
-			$rider->getDataPropertyManager()->setFloat(self::DATA_RIDER_MIN_ROTATION, -90);
+				//Lock the rider rotation -90 to 90
+				$rider->getDataPropertyManager()->setByte(self::DATA_RIDER_ROTATION_LOCKED, true);
+				$rider->getDataPropertyManager()->setFloat(self::DATA_RIDER_MAX_ROTATION, 90);
+				$rider->getDataPropertyManager()->setFloat(self::DATA_RIDER_MIN_ROTATION, -90);
+
+				$this->riders[0] = $rider;
+			}else{ //is second rider
+				//Set the rider seat position to (-0.6, 0)
+				$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(-0.6, 0));
+
+				$this->riders[1] = $rider;
+			}
+			//TODO: Set seat number, `$who->getDataPropertyManager()->setByte(self::DATA_CONTROLLING_RIDER_SEAT_NUMBER, $what);`
 
 			//Link entity to boat
 			$pk = new SetEntityLinkPacket();
 			$pk->link = new EntityLink($this->getId(), $rider->getId(), EntityLink::TYPE_RIDER);
 			Server::getInstance()->broadcastPacket($this->getViewers(), $pk);
-
-			$this->rider = $rider;
 			return true;
 		}
 		return false;
@@ -163,7 +169,7 @@ class Boat extends Entity{
 	 * @return bool
 	 */
 	public function unlink(Entity $rider) : bool{
-		if($this->rider === $rider){
+		if($this->isRider($rider)){
 			$rider->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_RIDING, false);
 
 			//Reset the rider seat position
@@ -177,7 +183,7 @@ class Boat extends Entity{
 			$pk->link = new EntityLink($this->getId(), $rider->getId(), EntityLink::TYPE_REMOVE);
 			Server::getInstance()->broadcastPacket($this->getViewers(), $pk);
 
-			$this->rider = null;
+			unset($this->riders[array_search($rider, $this->riders, true)]);
 			return true;
 		}
 		return false;
@@ -195,10 +201,10 @@ class Boat extends Entity{
 	}
 
 	/**
-	 * @return null|Entity
+	 * @return Entity[]
 	 */
-	public function getRider() : ?Entity{
-		return $this->rider;
+	public function getRiders() : array{
+		return $this->riders;
 	}
 
 	/**
@@ -207,6 +213,6 @@ class Boat extends Entity{
 	 * @return bool
 	 */
 	public function isRider(Entity $rider) : bool{
-		return $this->rider === $rider;
+		return in_array($rider, $this->riders, true);
 	}
 }
