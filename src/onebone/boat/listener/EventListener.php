@@ -54,16 +54,9 @@ class EventListener implements Listener{
 				$entity->absoluteMove($packet->position, $packet->xRot, $packet->zRot);
 				$event->setCancelled();
 			}
-		}elseif($packet instanceof PlayerInputPacket){
+		}elseif($packet instanceof PlayerInputPacket || $packet instanceof SetEntityMotionPacket){
 			if($player->getDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_RIDING)){
-				foreach($player->getViewers() as $key => $viewer){
-					$viewer->dataPacket($packet);
-				}
-				$event->setCancelled();
-			}
-		}elseif($packet instanceof SetEntityMotionPacket){
-			if($player->getDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_RIDING)){
-				//TODO: Handle SetEntityMotionPacket
+				//TODO: Handle PlayerInputPacket and SetEntityMotionPacket
 				$event->setCancelled();
 			}
 		}
