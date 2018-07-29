@@ -148,7 +148,7 @@ class Boat extends Entity{
 				$this->riders[0] = $rider;
 			}else{ //is second rider
 				//Set the rider seat position to (-0.6, 0)
-				$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(-0.6, 0));
+				$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(-0.6, 0.8));
 
 				$this->riders[1] = $rider;
 			}
@@ -173,7 +173,7 @@ class Boat extends Entity{
 			$rider->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_RIDING, false);
 
 			//Reset the rider seat position
-			$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(0, 0.8, 0));
+			$rider->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, new Vector3(0, 0, 0));
 
 			//Unlock the rider rotation
 			$rider->getDataPropertyManager()->setByte(self::DATA_RIDER_ROTATION_LOCKED, false);
