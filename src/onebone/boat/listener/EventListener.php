@@ -36,9 +36,7 @@ class EventListener implements Listener{
 			$entity = $player->getLevel()->getEntity($packet->trData->entityRuntimeId);
 			if($entity instanceof BoatEntity){
 				if($packet->trData->actionType === InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_INTERACT){
-					if($entity->canLink($player)){
-						$entity->link($player);
-					}
+					$entity->link($player);
 					$event->setCancelled();
 				}
 			}
