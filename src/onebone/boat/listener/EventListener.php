@@ -50,7 +50,7 @@ class EventListener implements Listener{
 			}
 		}elseif($packet instanceof MoveEntityAbsolutePacket){
 			$entity = $player->getLevel()->getEntity($packet->entityRuntimeId);
-			if($entity instanceof BoatEntity && $entity->isRider($player)){
+			if($entity instanceof BoatEntity && $entity->isFisrtRider($player)){
 				$entity->absoluteMove($packet->position, $packet->xRot, $packet->zRot);
 				$event->setCancelled();
 			}

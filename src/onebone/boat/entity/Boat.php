@@ -215,4 +215,13 @@ class Boat extends Entity{
 	public function isRider(Entity $rider) : bool{
 		return in_array($rider, $this->riders, true);
 	}
+
+	/**
+	 * @param Entity $rider
+	 *
+	 * @return bool
+	 */
+	public function isFisrtRider(Entity $rider) : bool{
+		return isset($this->riders[0]) && $this->riders[0] === $rider;
+	}
 }
