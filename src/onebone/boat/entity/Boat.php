@@ -27,14 +27,16 @@ class Boat extends Vehicle{
 	public const ACTION_ROW_LEFT = 129;
 
 	/** @var float */
-	public $height = 0.455;
+	public $height = 0.7;
 	/** @var float */
-	public $width = 1.4;
+	public $width = 1.6;
 
 	/** @var float */
-	public $gravity = 0.0;
+	public $gravity = 0.1;
 	/** @var float */
 	public $drag = 0.1;
+	/** @var float */
+	protected $baseOffset = 0.35;
 
 	/** @var Entity */
 	public $rider;
