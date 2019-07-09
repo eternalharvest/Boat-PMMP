@@ -119,11 +119,48 @@ class Boat extends Vehicle{
 			return false;
 		}
 
+		$tickDiff = $currentTick - $this->lastUpdate;
+		if($tickDiff <= 0 && !$this->justCreated){
+			return true;
+		}
+
+		$hasUpdate = $this->entityBaseTick($tickDiff);
+
+		if($this->isAlive()){
+			parent::onUpdate($currentTick);
+
+			$this->motion->y = ($this->level->getBlock($this)->getBoundingBox() !== null || $this->isUnderWater()) ? $this->gravity : -0.08;
+
+			if($this->checkObstruction($this->x, $this->y, $this->z)){
+				$hasUpdate = true;
+			}
+
+			$this->move($this->motion->x, $this->motion->y, $this->motion->z);
+
+			$friction = 1 - $this->drag;
+
+			if($this->onGround && (abs($this->motion->x) > 0.00001 || abs($this->motion->z) > 0.00001)){
+				$this->temporalVector->setComponents((int)floor($this->x), (int)floor($this->y), (int)floor($this->z));
+				$friction *= $this->getLevel()->getBlock($this->temporalVector)->getFrictionFactor();
+			}
+
+			$this->motion->x *= $friction;
+			$this->motion->y *= 1 - $this->drag;
+			$this->motion->z *= $friction;
+
+			if($this->onGround){
+				$this->motion->y *= -0.5;
+			}
+		}
+
 		//Regenerate health 1⁄10 per tick
 		if($this->getHealth() < $this->getMaxHealth() && $currentTick % 10 === 0){
 			$this->heal(new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_REGEN));
 		}
-		return parent::onUpdate($currentTick);
+
+		$this->updateMovement();
+
+		return $hasUpdate || !$this->onGround || abs($this->motion->x) > 0.00001 || abs($this->motion->y) > 0.00001 || abs($this->motion->z) > 0.00001;
 	}
 
 	/**
@@ -218,7 +255,7 @@ class Boat extends Vehicle{
 	 * @param float   $pitch = 0
 	 */
 	public function absoluteMove(Vector3 $pos, float $yaw = 0, float $pitch = 0) : void{
-		$this->setComponents($pos->x, $pos->y, $pos->z);
+		$this->setPosition($pos);
 		$this->setRotation($yaw, $pitch);
 		$this->updateMovement();
 	}
